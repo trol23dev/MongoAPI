@@ -5,6 +5,7 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import MongoDB from './MongoDB/MongoConnection';
 import { ObjectId } from 'mongodb';
+import { color } from './functions';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -64,13 +65,16 @@ app.post("/api/:database/:collection", async (req: Request, res: Response) => {
 app.put("/api/:database/:collection/:id", async (req: Request, res: Response) => {
     const databaseName = req.params.database;
     const mongoDB = new MongoDB(databaseName);
-    mongoDB.connect();
-    const collectionName = req.params.collection;
-    const collection = mongoDB.getDatabase().collection(collectionName);
-    const documentId = req.params.id;
-    const updatedDocument = req.body;
 
     try {
+        await mongoDB.connect();
+        const collectionName = req.params.collection;
+        const collection = mongoDB.getDatabase().collection(collectionName);
+        
+        const documentId = new ObjectId(req.params.id);
+
+        const updatedDocument = req.body;
+
         const result = await collection.updateOne({ _id: documentId }, { $set: updatedDocument });
         if (result.modifiedCount === 1) {
             res.json({ message: "Documento actualizado exitosamente" });
@@ -80,7 +84,7 @@ app.put("/api/:database/:collection/:id", async (req: Request, res: Response) =>
     } catch (error) {
         res.status(500).json({ error: "Error al actualizar el documento" });
     } finally {
-        mongoDB.close();
+        await mongoDB.close();
     }
 });
 
@@ -116,5 +120,8 @@ process.on("SIGINT", async () => {
 });
 
 app.listen(port, () => {
-    console.log(`API is running on http://localhost:${port}`);
+    // console.log(`API is running on http://localhost:${port}`);
+    // const info = 
+
+    console.table([{url: 'http://localhost:', puerto: `${port}`, status: `ON`}])
 });
