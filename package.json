@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node-dev --respawn --transpile-only --poll ./src/index.ts",
+    "start": "ts-node-dev --respawn --transpile-only --poll ./src/infra/index.ts",
     "build": "npm install && tsc"
   },
   "author": "",
@@ -17,9 +17,7 @@
     "mongodb": "^6.1.0",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.2.2"
-  },
-  "devDependencies": {
+    "typescript": "^5.2.2",
     "body-parser": "^1.20.2",
     "chalk": "^4.1.2",
     "dotenv": "^16.3.1",
