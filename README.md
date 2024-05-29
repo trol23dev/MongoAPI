@@ -68,6 +68,3 @@ To run this project, you will need to add the following environment variables to
 | `database` | `string` | **Required**. Your database name. |
 | `collection` | `string` | **Required**. The collection you want to delete the information. |
 | `collection` | `string` | **Required**. The id of the information you want to delete. |
-
-![Logo](https://i.postimg.cc/WbyjnZyT/Logotipo-Birdy-Project-03.png)
-
