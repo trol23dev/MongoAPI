@@ -1,0 +1,10 @@
+.git
+.env
+.env.*
+bin/
+*.exe
+*.test
+*.out
+.vscode/
+.idea/
+README.md

@@ -1,70 +1,185 @@
+# MongoDB REST API in Go (Hexagonal Architecture + Fiber)
 
-## Author
+> API RESTful de ultra-alto rendimiento para MongoDB desarrollada en **Go (Golang)** bajo los principios de **Arquitectura Hexagonal (Ports & Adapters)**, utilizando el framework **Fiber v2**, con un **CRUD completo**, pool de conexiones persistente y soporte dinámico para múltiples bases de datos y colecciones.
 
-- [Ramón L.](https://www.github.com/trol23dev)
+---
 
+## 👨‍💻 Autor
 
-# API for MongoDB
+- [Ramón L. (trol23dev)](https://www.github.com/trol23dev)
 
-The API developed for this project serves as the backbone of the system, facilitating communication with a MongoDB database. Here's a brief description of the API:
+---
 
-The API is built using Express.js, a fast, unopinionated, and minimalist web framework for Node.js. It provides a robust set of features for building web applications and APIs, including routing, middleware support, and HTTP utilities.
+## 🏛️ Arquitectura Hexagonal (Ports & Adapters)
 
-The API exposes several endpoints that handle various operations related to tickets and inventory management. These endpoints allow to interact with the database seamlessly.
+El proyecto está diseñado siguiendo estrictamente la separación de responsabilidades:
 
-The API leverages MongoDB as the database management system, providing a flexible and scalable solution for storing and retrieving data. It utilizes the MongoDB Node.js driver to establish connections with the database and execute queries to perform CRUD (Create, Read, Update, Delete) operations on documents.
+```
+├── cmd/
+│   └── api/
+│       └── main.go                 # Composition Root (Inyección de Dependencias)
+├── internal/
+│   ├── core/                       # Núcleo de Dominio & Casos de Uso
+│   │   ├── domain/                 # Entidades y errores agnósticos
+│   │   │   ├── document.go
+│   │   │   ├── filter.go
+│   │   │   └── errors.go
+│   │   ├── ports/                  # Interfaces de Puertos
+│   │   │   ├── inbound.go          # Driving Port: DocumentUseCase
+│   │   │   └── outbound.go         # Driven Port: DocumentRepository
+│   │   └── services/               # Implementación de casos de uso (Business Logic)
+│   │       └── document_service.go
+│   ├── adapters/                   # Adaptadores
+│   │   ├── http/                   # Adaptador Primario (Driving): Fiber REST API
+│   │   │   ├── handler.go
+│   │   │   └── router.go
+│   │   └── repository/             # Adaptador Secundario (Driven): MongoDB Driver v2
+│   │       └── mongo_repository.go
+│   └── infrastructure/             # Infraestructura
+│       ├── config/                 # Carga de variables de entorno (.env)
+│       ├── db/                     # Cliente y pool de conexión MongoDB
+│       └── logger/                 # Logging con emojis y colores
+├── bin/
+│   └── api.exe                     # Binario compilado
+├── .env
+├── example.env
+├── .gitignore
+├── go.mod
+├── go.sum
+└── README.md
+```
 
-Overall, the API acts as a bridge between a project and the database, allowing for seamless communication.
-## Deployment
+---
 
-To deploy this project run
+## 🚀 Características
 
+- **Arquitectura Hexagonal**: Máxima desacoplación entre el dominio, los adaptadores de transporte (HTTP) y la base de datos (MongoDB).
+- **Framework Web Fiber v2 (`gofiber/fiber`)**: Construido sobre Fasthttp (el motor HTTP más rápido en Go), con middleware de recuperación, CORS y Monitor integrado.
+- **Driver Oficial MongoDB v2**: Pool de conexiones persistente (`go.mongodb.org/mongo-driver/v2`) para máxima eficiencia.
+- **CRUD Completo**:
+  - `GET /api/:database/:collection` (Listar todos con soporte para `limit`, `skip`, `sort`, `filter`)
+  - `GET /api/:database/:collection/:id` (Obtener documento por ID)
+  - `POST /api/:database/:collection` (Crear documento individual o inserción por lotes)
+  - `PUT /api/:database/:collection/:id` (Reemplazo / actualización completa)
+  - `PATCH /api/:database/:collection/:id` (Actualización parcial `$set`)
+  - `DELETE /api/:database/:collection/:id` (Eliminación por ID)
+  - `GET /health` (Estado del servidor y conexión con MongoDB)
+  - `GET /monitor` (Dashboard visual en tiempo real del servidor)
+- **Logging Personalizado**: Salida con emojis y colores para depuración clara (`🔧 SYSTEM`, `⚠️ WARNING`, `✅ SUCCESS`, `❌ ERROR`).
+
+---
+
+## ⚙️ Variables de Entorno
+
+Crea o edita tu archivo `.env` en la raíz del proyecto:
+
+```env
+PORT=3000
+MONGO_URI="mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
+```
+
+| Variable | Descripción | Valor por Defecto |
+| :--- | :--- | :--- |
+| `PORT` | Puerto donde escuchará la API | `3000` |
+| `MONGO_URI` | Cadena de conexión de MongoDB | *(Requerido)* |
+
+---
+
+## 📦 Ejecución y Despliegue
+
+### Modo Desarrollo
 ```bash
-  npm run build
+go run cmd/api/main.go
 ```
 
+### Compilar Binario
 ```bash
-  npm run start
+go build -o bin/api.exe ./cmd/api
 ```
-## Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
+### Ejecutar Binario
+```bash
+./bin/api.exe
+```
 
-`MONGO_URI`
+---
 
+## 📖 Referencia de la API (API Reference)
 
-## API Reference
-
-#### Get all items
+### 1. Health Check & Monitor
+```http
+GET /health
+```
+**Respuesta:**
+```json
+{
+  "status": "ok",
+  "database": "connected",
+  "time": "2026-08-15T13:50:00Z"
+}
+```
 
 ```http
-  GET /api/:database/:collection
+GET /monitor
+GET /metrics
 ```
+> **Fiber Monitor Dashboard**: Abre `http://localhost:3000/monitor` en tu navegador para ver un panel visual en tiempo real con el consumo de CPU, RAM, uso de red, peticiones por segundo y estadísticas del servidor.
 
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `database` | `string` | **Required**. Your database name. |
-| `collection` | `string` | **Required**. The collection you want to get the information. |
+---
 
-#### Post item
-
+### 2. Obtener Todos los Documentos
 ```http
-  POST /api/:database/:collection
+GET /api/:database/:collection
 ```
 
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `database` | `string` | **Required**. Your database name. |
-| `collection` | `string` | **Required**. The collection you want to push the information. |
+#### Parámetros Query Opcionales:
+- `limit`: Número máximo de documentos a devolver (ej. `?limit=20`)
+- `skip`: Número de documentos a omitir para paginación (ej. `?skip=40`)
+- `sort`: Campo para ordenar. Anteponer `-` para orden descendente (ej. `?sort=-createdAt` o `?sort=name`)
+- `filter`: Filtro JSON para consultas complejas (ej. `?filter={"status":"active"}`)
 
-#### Delete item
+---
 
+### 3. Obtener Documento por ID
 ```http
-  DELETE /api/:database/:collection/:id
+GET /api/:database/:collection/:id
+```
+- Soporta tanto `ObjectID` estándar de MongoDB de 24 caracteres como identificadores de cadena personalizados.
+
+---
+
+### 4. Crear Documento(s)
+```http
+POST /api/:database/:collection
+```
+- **Insertar un documento único**: Enviar un objeto JSON `{ "nombre": "Producto 1", "precio": 100 }`.
+- **Insertar múltiples documentos (Bulk)**: Enviar un array JSON `[{"nombre": "A"}, {"nombre": "B"}]`.
+
+---
+
+### 5. Reemplazar Documento Completo (PUT)
+```http
+PUT /api/:database/:collection/:id
+```
+- Reemplaza todo el contenido del documento manteniendo el mismo `_id`.
+
+---
+
+### 6. Actualizar Parcialmente Documento (PATCH)
+```http
+PATCH /api/:database/:collection/:id
+```
+- Aplica una actualización `$set` únicamente sobre los campos incluidos en el cuerpo JSON:
+```json
+{
+  "precio": 120,
+  "stock": 15
+}
 ```
 
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `database` | `string` | **Required**. Your database name. |
-| `collection` | `string` | **Required**. The collection you want to delete the information. |
-| `id` | `string` | **Required**. The id of the information you want to delete. |
+---
+
+### 7. Eliminar Documento (DELETE)
+```http
+DELETE /api/:database/:collection/:id
+```

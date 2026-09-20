@@ -1,5 +1,46 @@
-# Ignore everything in `node_modules` directory
-node_modules/
-
-# Ignore environment file
+# Variables de entorno y secretos
 .env
+.env.*
+!.env.example
+!example.env
+
+# Binarios y compilaciones de Go
+bin/
+dist/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Cobertura y profiling
+*.coverprofile
+coverage.txt
+coverage.out
+profile.out
+
+# Dependencias vendor (si se usan en el futuro)
+vendor/
+
+# Archivos de log
+*.log
+
+# IDEs y editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Residuos de proyectos previos (Node/TS)
+node_modules/
