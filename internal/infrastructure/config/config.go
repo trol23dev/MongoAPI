@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"mongodb-api/internal/infrastructure/logger"
 
@@ -34,12 +35,12 @@ func Load() *Config {
 		}
 	}
 
-	mongoURI := os.Getenv("MONGO_URI")
+	mongoURI := strings.Trim(strings.TrimSpace(os.Getenv("MONGO_URI")), "\"'")
 	if !loaded && mongoURI == "" {
 		logger.New(logger.Warning).Print("No se pudo cargar el archivo .env desde las rutas estándar ni se encontró MONGO_URI en el sistema.")
 	}
 
-	port := os.Getenv("PORT")
+	port := strings.Trim(strings.TrimSpace(os.Getenv("PORT")), "\"'")
 	if port == "" {
 		port = "3000"
 	}
