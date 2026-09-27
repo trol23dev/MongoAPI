@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -36,11 +37,12 @@ func main() {
 	documentHandler := httpAdapter.NewDocumentHandler(documentService)
 	app := httpAdapter.NewRouter(documentHandler)
 
-	addr := fmt.Sprintf(":%s", cfg.Port)
+	port := strings.TrimPrefix(cfg.Port, ":")
+	addr := fmt.Sprintf("0.0.0.0:%s", port)
 
 	// 6. Start server
 	go func() {
-		logger.New(logger.Success).Print(fmt.Sprintf("🚀 Servidor iniciado en http://localhost:%s (Arquitectura Hexagonal + Fiber)", cfg.Port))
+		logger.New(logger.Success).Print(fmt.Sprintf("🚀 Servidor iniciado y escuchando en http://0.0.0.0:%s (Arquitectura Hexagonal + Fiber)", port))
 		if err := app.Listen(addr); err != nil {
 			logger.New(logger.Error).Print(fmt.Sprintf("Error en servidor Fiber: %v", err))
 		}
